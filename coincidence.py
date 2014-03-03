@@ -8,7 +8,7 @@ import time
 fig=plt.figure()
 plt.axis([0,10,0,50000])
 
-s = serial.Serial("COM1",19200,bytesize=serial.SEVENBITS,stopbits=serial.STOPBITS_ONE)
+s = serial.Serial("/dev/ttyUSB2",19200,bytesize=serial.SEVENBITS,stopbits=serial.STOPBITS_ONE)
 
 buffer = []
 while True:

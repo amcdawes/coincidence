@@ -28,6 +28,7 @@ while True:
 
         axes.relim()
         axes.autoscale_view(True,True,True)
+        plt.pause(0.001)
         plt.draw()
         time.sleep(0.05)
     except KeyboardInterrupt:
