@@ -32,7 +32,6 @@ while True:
     try:
         data = s.read()
         if data == "\x7f":
-            s.flushInput()
             bits = BitArray(bytes=buffer)
             # test length:
             if bits.length == 8*40:
