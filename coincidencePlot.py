@@ -25,19 +25,20 @@ rects = axes.bar(index,dataset,bar_width)
 plt.xticks(index + bar_width/2.0, ("A", "B", "A'", "B'", "C4", "C5", "C6", "C7"))
 
 
-s = serial.Serial("/dev/ttyUSB2",19200,bytesize=serial.SEVENBITS,stopbits=serial.STOPBITS_ONE)
+s = serial.Serial("/dev/ttyUSB0",19200,bytesize=serial.SEVENBITS,stopbits=serial.STOPBITS_ONE)
 buffer = []
-
+s.flushInput()
 while True:
     try:
         data = s.read()
         if data == "\x7f":
+            s.flushInput()
             bits = BitArray(bytes=buffer)
-	    # test length:
-	    if bits.length == 8*40:
-		time.sleep(0.1)
-            	a, b, c, d, c4, c5, c6, c7 = bits.unpack('uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40')
-		print a, b, c, d, c4, c5, c6, c7
+            # test length:
+            if bits.length == 8*40:
+                time.sleep(0.1)
+                a, b, c, d, c4, c5, c6, c7 = bits.unpack('uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40')
+                print a, b, c, d, c4, c5, c6, c7
                 newdata = (a, b, c, d, c4, c5, c6, c7)
                 for rect, h in zip(rects, newdata):
                     rect.set_height(h)
@@ -49,13 +50,10 @@ while True:
             else:
                 print "short packet"
             buffer = []
+            s.flushInput()
         else:
             buffer.append(data)
     except KeyboardInterrupt:
         print "W: interrupt received, ending data collection"
+        s.close()
         break
-
-s.close()
-
-
-
