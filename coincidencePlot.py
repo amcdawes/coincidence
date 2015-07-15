@@ -12,16 +12,23 @@ import time
 
 plt.ion()
 fig = plt.figure()
-axes = fig.add_subplot(111)
-axes.set_autoscale_on(True)
-axes.autoscale_view(True,True,True)
+axes = fig.add_subplot(121)
+axes2 = fig.add_subplot(122)
+# axes.set_autoscale_on(True)
+# axes.autoscale_view(True,True,True)
+# axes2.set_autoscale_on(True)
+# axes2.autoscale_view(True,True,True)
+axes.set_ylim([0,100000])
+axes2.set_ylim([0,20])
 
-dataset = (1,1,1,1,1,1,1,1)
+dataset = (1,1,1,1)
+dataset2 = (1,1,1,1)
 
-index = np.arange(8)
+index = np.arange(4)
 bar_width = 0.3
 
 rects = axes.bar(index,dataset,bar_width)
+rects2 = axes2.bar(index,dataset2,bar_width)
 plt.xticks(index + bar_width/2.0, ("A", "B", "A'", "B'", "C4", "C5", "C6", "C7"))
 
 
@@ -35,15 +42,23 @@ while True:
             bits = BitArray(bytes=buffer)
             # test length:
             if bits.length == 8*40:
-                time.sleep(0.1)
+                #time.sleep(0.1)
                 a, b, c, d, c4, c5, c6, c7 = bits.unpack('uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40')
-                print a, b, c, d, c4, c5, c6, c7
-                newdata = (a, b, c, d, c4, c5, c6, c7)
+                #print a, b, c, d, c4, c5, c6, c7
+                newdata = (a, b, c, d)
+                newdata2 = (c4, c5, c6, c7)
                 for rect, h in zip(rects, newdata):
                     rect.set_height(h)
 
-                axes.relim()
-                axes.autoscale_view(True,True,True)
+                for rect2, h in zip(rects2, newdata2):
+                    rect2.set_height(h)
+                #
+                # axes.relim()
+                # axes.autoscale_view(True,True,True)
+                #
+                # axes2.relim()
+                # axes2.autoscale_view(True,True,True)
+
                 plt.pause(0.001)
                 plt.draw()
             else:
