@@ -8,7 +8,8 @@ from bitstring import BitArray
 import matplotlib.pyplot as plt
 import time
 
-
+scale1 = 1000
+scale2 = 1000
 
 plt.ion()
 fig = plt.figure()
@@ -18,8 +19,8 @@ axes2 = fig.add_subplot(122)
 # axes.autoscale_view(True,True,True)
 # axes2.set_autoscale_on(True)
 # axes2.autoscale_view(True,True,True)
-axes.set_ylim([0,100000])
-axes2.set_ylim([0,20])
+axes.set_ylim([0,scale1])
+axes2.set_ylim([0,scale2])
 
 dataset = (1,1,1,1)
 dataset2 = (1,1,1,1)
@@ -44,7 +45,7 @@ while True:
             if bits.length == 8*40:
                 #time.sleep(0.1)
                 a, b, c, d, c4, c5, c6, c7 = bits.unpack('uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40,uintle:40')
-                #print a, b, c, d, c4, c5, c6, c7
+                print a, b, c, d, c4, c5, c6, c7
                 newdata = (a, b, c, d)
                 newdata2 = (c4, c5, c6, c7)
                 for rect, h in zip(rects, newdata):
@@ -52,7 +53,18 @@ while True:
 
                 for rect2, h in zip(rects2, newdata2):
                     rect2.set_height(h)
-                #
+                if a > scale1 or  b > scale1:
+                    scale1 += 10000
+                    axes.set_ylim([0,scale1])
+                elif a < (scale1/2) and b < (scale1/2):
+                    scale1 -= scale1/2
+                    axes.set_ylim([0,scale1])
+                if c4 > scale2:
+                    scale2 += 1000
+                    axes2.set_ylim([0,scale2])
+                elif c4 < (scale2/2):
+                    scale2 -= scale2/2
+                    axes2.set_ylim([0,scale2])
                 # axes.relim()
                 # axes.autoscale_view(True,True,True)
                 #
