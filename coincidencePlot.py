@@ -33,7 +33,7 @@ rects2 = axes2.bar(index,dataset2,bar_width)
 plt.xticks(index + bar_width/2.0, ("A", "B", "A'", "B'", "C4", "C5", "C6", "C7"))
 
 
-s = serial.Serial("/dev/ttyUSB0",19200,bytesize=serial.SEVENBITS,stopbits=serial.STOPBITS_ONE)
+s = serial.Serial("/dev/ttyS0",19200,bytesize=serial.SEVENBITS,stopbits=serial.STOPBITS_ONE)
 buffer = []
 s.flushInput()
 while True:
@@ -54,16 +54,16 @@ while True:
                 for rect2, h in zip(rects2, newdata2):
                     rect2.set_height(h)
                 if a > scale1 or  b > scale1:
-                    scale1 += 10000
+                    scale1 = 1.2*max(a,b)
                     axes.set_ylim([0,scale1])
                 elif a < (scale1/2) and b < (scale1/2):
-                    scale1 -= scale1/2
+                    scale1 = 1.2*max(a,b)
                     axes.set_ylim([0,scale1])
                 if c4 > scale2:
-                    scale2 += 1000
+                    scale2 = c4*1.2
                     axes2.set_ylim([0,scale2])
                 elif c4 < (scale2/2):
-                    scale2 -= scale2/2
+                    scale2 = c4*1.2
                     axes2.set_ylim([0,scale2])
                 # axes.relim()
                 # axes.autoscale_view(True,True,True)
