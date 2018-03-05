@@ -32,7 +32,5 @@ while True:
         plt.draw()
         time.sleep(0.05)
     except KeyboardInterrupt:
-        print "Keyboard stop"
+        print("Keyboard stop")
         break
-
-
