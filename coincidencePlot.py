@@ -51,29 +51,28 @@ while True:
             # test length:
             if True:
                 #time.sleep(0.1)
-                a, b, c, d, c4, c5, c6, c7, err = data.decode('ascii').rstrip().split(' ') # TODO parse as ints
+                a, b, c, d, c4, c5, c6, c7, err = [int(x) for x in data.decode('ascii').rstrip().split(' ')]
                 # print(a, b, c, d, c4, c5, c6, c7)
                 newdata = (a, b, c, d)
-                newdata = map(int,newdata)
                 newdata2 = (c4, c5, c6, c7)
-                newdata2 = map(int,newdata2)
+
                 for rect, h in zip(rects, newdata):
                     rect.set_height(h)
 
                 for rect2, h in zip(rects2, newdata2):
                     rect2.set_height(h)
 
-                if int(a) > scale1 or  int(b) > scale1:
-                    scale1 = 1.2*max(int(a),int(b))
+                if a > scale1 or  b > scale1:
+                    scale1 = 1.2*max(a,b)
                     axes.set_ylim([0,scale1])
-                elif int(a) < (scale1/2) and int(b) < (scale1/2):
-                    scale1 = 1.2*max(int(a),int(b))
+                elif a < (scale1/2) and b < (scale1/2):
+                    scale1 = 1.2*max(a,b)
                     axes.set_ylim([0,scale1])
-                if int(c4) > scale2 or int(c5) > scale2:
-                    scale2 = 1.2*max(int(c4),int(c5))
+                if c4 > scale2 or c5 > scale2:
+                    scale2 = 1.2*max(c4,c5)
                     axes2.set_ylim([0,scale2])
-                elif int(c4) < (scale2/2) or int(c5) < scale2:
-                    scale2 = 1.2*max(int(c4),int(c5))
+                elif c4 < (scale2/2) or c5 < scale2:
+                    scale2 = 1.2*max(c4,c5)
                     axes2.set_ylim([0,scale2])
                 # axes.relim()
                 # axes.autoscale_view(True,True,True)
