@@ -7,9 +7,9 @@ import numpy as np
 import numpy.random as random
 
 from bokeh.io import curdoc
-from bokeh.layouts import row, widgetbox
+from bokeh.layouts import row, widgetbox, column
 from bokeh.models import ColumnDataSource, Range1d
-from bokeh.models.widgets import Slider, TextInput
+from bokeh.models.widgets import Slider, TextInput, Paragraph
 from bokeh.plotting import figure
 
 
@@ -27,34 +27,39 @@ counts = [0,0,0,0]
 source = ColumnDataSource(data=dict(x=channels, y=counts))
 source2 = ColumnDataSource(data=dict(x=coinc, y=counts))
 
+a = []
+b = []
+
 # Set up plot
-plot = figure(plot_height=400, plot_width=400, title="Single counts",
+plot = figure(plot_height=400, plot_width=800, title="Single counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
               x_range=channels, y_range=[0, 100000])
 
 plot.vbar(x='x', top='y', width=0.5, source=source)
 
-plot2 = figure(plot_height=400, plot_width=400, title="Coincidence counts",
+plot2 = figure(plot_height=400, plot_width=800, title="Coincidence counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
               x_range=coinc, y_range=[0, 1000])
 
 plot2.vbar(x='x', top='y', width=0.5, source=source2)
 
 # Set up widgets
-text = TextInput(title="Command Entry:", value='raw counts')
-scalemin = Slider(title="Singles Scale minimum", value=0.0, start=0.0, end=5000.0, step=100)
-scalemax = Slider(title="Singles Scale maximum", value=1000.0, start=1000.0, end=5500.0, step=100)
+command = TextInput(title="Command Entry:", value='raw counts')
+scalemin = Slider(title="Singles Scale minimum", value=0.0, start=0.0, end=1000.0, step=100)
+scalemax = Slider(title="Singles Scale maximum", value=1000.0, start=1000.0, end=500000.0, step=100)
 scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.0, step=100)
-scalemax2 = Slider(title="Coinc. Scale maximum", value=1000.0, start=1000.0, end=5500.0, step=100)
-freq = Slider(title="frequency", value=1.0, start=0.1, end=5.1, step=0.1)
+scalemax2 = Slider(title="Coinc. Scale maximum", value=1000.0, start=1000.0, end=100000.0, step=100)
+phase = Slider(title="phase", value=0.0, start=0.0, end=5.0, step=0.1)
+statsA = Paragraph(text="100", width=100, height=20, style={"font-size: 20pt;" : "font-size: 20pt;"})
+statsB = Paragraph(text="100", width=100, height=20)
 
 
 # Set up callbacks
 def update_title(attrname, old, new):
     #TODO turn into a raw command area?
-    plot.title.text = text.value
+    plot.title.text = command.value
 
-text.on_change('value', update_title)
+command.on_change('value', update_title)
 
 def update():
     # get data:
@@ -70,8 +75,16 @@ def update():
     coinc = data[4:8]
     err = data[8]
 
-    print(raw)
+    a.append(raw[0])
+    b.append(raw[1])
+    if len(a) > 10: a.pop(0)
+    if len(b) > 10: b.pop(0)
 
+    statsA.text = "A: %d +/- %d" % (np.mean(a), np.std(a))
+    statsB.text = "B: %d +/- %d" % (np.mean(b), np.std(b))
+
+    #print(raw)
+    plot.title.text = "A:%d B:%d" % (raw[0], raw[1])
     # Get the current slider values
     # a = scalemax.value
     # b = scalemin.value
@@ -88,25 +101,28 @@ def update():
 def update_data(attrname, old, new):
 
     # Get the current slider values
-    a = scalemax2.value
-    b = scalemin2.value
+    smin = scalemin.value
+    smax = scalemax.value
+    s2max = scalemax2.value
+    s2min = scalemin2.value
     w = phase.value
-    k = freq.value
 
     #update()
 
-    plot2.y_range.start = b
-    plot2.y_range.end = a
+    plot.y_range.start = smin
+    plot.y_range.end = smax
+    plot2.y_range.start = s2min
+    plot2.y_range.end = s2max
 
-for w in [scalemin, scalemax, phase, freq]:
+for w in [scalemin, scalemax, scalemin2, scalemax2]:
     w.on_change('value', update_data)
 
 
 # Set up layouts and add to document
-countControls = widgetbox(text, scalemin, scalemax, phase, freq)
+countControls = widgetbox(command, scalemin, scalemax)
 coincControls = widgetbox(scalemin2,scalemax2)
 
-curdoc().add_root(row(inputs, plot, plot2, width=1200))
-curdoc().add_root(row(coincControls, width=400))
+curdoc().add_root(row(countControls, plot, column(statsA, statsB), width=1250))
+curdoc().add_root(row(coincControls, plot2, width=1250))
 curdoc().title = "Coincidence"
 curdoc().add_periodic_callback(update, 100)
