@@ -15,7 +15,7 @@ from bokeh.plotting import figure
 
 import serial
 
-useSerial = False
+useSerial = True
 
 if useSerial:
     s = serial.Serial("/dev/ttyACM1",250000,timeout=2)
@@ -61,7 +61,7 @@ def update():
     if useSerial:
         s.write("c\n".encode())
         serialData = s.readline()
-        data = [int(x) for x in data.decode('ascii').rstrip().split(' ')]
+        data = [int(x) for x in serialData.decode('ascii').rstrip().split(' ')]
     else:
         mockdata = [80000,75043,1000,800,20,20,0,0,0]
         data = [random.rand()*x for x in mockdata]
@@ -70,7 +70,7 @@ def update():
     coinc = data[4:8]
     err = data[8]
 
-    #print(raw)
+    print(raw)
 
     # Get the current slider values
     # a = scalemax.value
