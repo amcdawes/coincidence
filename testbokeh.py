@@ -28,13 +28,13 @@ source = ColumnDataSource(data=dict(x=channels, y=counts))
 source2 = ColumnDataSource(data=dict(x=coinc, y=counts))
 
 # Set up plot
-plot = figure(plot_height=400, plot_width=400, title="raw counts",
+plot = figure(plot_height=400, plot_width=400, title="Single counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
               x_range=channels, y_range=[0, 100000])
 
 plot.vbar(x='x', top='y', width=0.5, source=source)
 
-plot2 = figure(plot_height=400, plot_width=400, title="raw coinc",
+plot2 = figure(plot_height=400, plot_width=400, title="Coincidence counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
               x_range=coinc, y_range=[0, 1000])
 
@@ -42,9 +42,10 @@ plot2.vbar(x='x', top='y', width=0.5, source=source2)
 
 # Set up widgets
 text = TextInput(title="Command Entry:", value='raw counts')
-scalemin = Slider(title="Scale minimum", value=0.0, start=0.0, end=5000.0, step=100)
-scalemax = Slider(title="Scale maximum", value=1000.0, start=1000.0, end=5500.0, step=100)
-phase = Slider(title="phase", value=0.0, start=0.0, end=2*np.pi, step=0.1)
+scalemin = Slider(title="Singles Scale minimum", value=0.0, start=0.0, end=5000.0, step=100)
+scalemax = Slider(title="Singles Scale maximum", value=1000.0, start=1000.0, end=5500.0, step=100)
+scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.0, step=100)
+scalemax2 = Slider(title="Coinc. Scale maximum", value=1000.0, start=1000.0, end=5500.0, step=100)
 freq = Slider(title="frequency", value=1.0, start=0.1, end=5.1, step=0.1)
 
 
@@ -87,8 +88,8 @@ def update():
 def update_data(attrname, old, new):
 
     # Get the current slider values
-    a = scalemax.value
-    b = scalemin.value
+    a = scalemax2.value
+    b = scalemin2.value
     w = phase.value
     k = freq.value
 
@@ -102,8 +103,10 @@ for w in [scalemin, scalemax, phase, freq]:
 
 
 # Set up layouts and add to document
-inputs = widgetbox(text, scalemin, scalemax, phase, freq)
+countControls = widgetbox(text, scalemin, scalemax, phase, freq)
+coincControls = widgetbox(scalemin2,scalemax2)
 
 curdoc().add_root(row(inputs, plot, plot2, width=1200))
-curdoc().title = "Sliders"
+curdoc().add_root(row(coincControls, width=400))
+curdoc().title = "Coincidence"
 curdoc().add_periodic_callback(update, 100)
