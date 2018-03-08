@@ -18,7 +18,10 @@ import serial
 useSerial = False
 
 if useSerial:
-    s = serial.Serial("/dev/ttyACM1",250000,timeout=2)
+    # TODO automatic search for correct port:
+    # make use of linux command: ls -l /dev/serial/by-id/*EJA*
+    # which will link to the correct /dev/tty*
+    s = serial.Serial("/dev/ttyACM2",250000,timeout=2)
 
 # Set up data
 channels = ["A","B","A'","B'"]
