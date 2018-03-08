@@ -5,7 +5,7 @@ First-draft attempt at controls, graphs and values.
 import numpy as np
 
 import numpy.random as random
-
+import time
 from bokeh.io import curdoc
 from bokeh.layouts import row, widgetbox, column
 from bokeh.models import ColumnDataSource, Range1d
@@ -15,7 +15,7 @@ from bokeh.plotting import figure
 
 import serial
 
-useSerial = True
+useSerial = False
 
 if useSerial:
     s = serial.Serial("/dev/ttyACM1",250000,timeout=2)
@@ -50,18 +50,26 @@ scalemax = Slider(title="Singles Scale maximum", value=1000.0, start=1000.0, end
 scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.0, step=100)
 scalemax2 = Slider(title="Coinc. Scale maximum", value=1000.0, start=1000.0, end=100000.0, step=100)
 phase = Slider(title="phase", value=0.0, start=0.0, end=5.0, step=0.1)
-statsA = Paragraph(text="100", width=100, height=20, style={"font-size: 20pt;" : "font-size: 20pt;"})
+statsA = Paragraph(text="100", width=100, height=20)
 statsB = Paragraph(text="100", width=100, height=20)
 
 
 # Set up callbacks
-def update_title(attrname, old, new):
+def send_command(attrname, old, new):
     #TODO turn into a raw command area?
     plot.title.text = command.value
 
-command.on_change('value', update_title)
+command.on_change('value', send_command)
 
-def update():
+last_time = time.time()
+def update_data():
+    # TODO: store data in stream for charting vs time
+
+    global last_time
+    T = time.time() - last_time
+    last_time = time.time()
+    print(T)
+
     # get data:
     if useSerial:
         s.write("c\n".encode())
@@ -98,7 +106,7 @@ def update():
     source.data = dict(x=channels, y=raw)
     source2.data = dict(x=chan2, y=coinc)
 
-def update_data(attrname, old, new):
+def update_scales(attrname, old, new):
 
     # Get the current slider values
     smin = scalemin.value
@@ -115,7 +123,7 @@ def update_data(attrname, old, new):
     plot2.y_range.end = s2max
 
 for w in [scalemin, scalemax, scalemin2, scalemax2]:
-    w.on_change('value', update_data)
+    w.on_change('value', update_scales)
 
 
 # Set up layouts and add to document
@@ -125,4 +133,4 @@ coincControls = widgetbox(scalemin2,scalemax2)
 curdoc().add_root(row(countControls, plot, column(statsA, statsB), width=1250))
 curdoc().add_root(row(coincControls, plot2, width=1250))
 curdoc().title = "Coincidence"
-curdoc().add_periodic_callback(update, 100)
+curdoc().add_periodic_callback(update_data, 100)
