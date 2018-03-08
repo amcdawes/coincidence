@@ -18,7 +18,7 @@ import serial
 useSerial = True
 
 if useSerial:
-    s = serial.Serial("/dev/ttyACM1",250000,timeout=2)
+    s = serial.Serial("/dev/ttyACM2",250000,timeout=2)
 
 # Set up data
 channels = ["A","B","A'","B'"]
