@@ -14,6 +14,7 @@ from bokeh.plotting import figure
 
 
 import serial
+import serial.tools.list_ports
 
 useSerial = True
 
@@ -21,7 +22,12 @@ if useSerial:
     # TODO automatic search for correct port:
     # make use of linux command: ls -l /dev/serial/by-id/*EJA*
     # which will link to the correct /dev/tty*
-    s = serial.Serial("/dev/ttyACM2",250000,timeout=2)
+    # or something similar in serial.tools:
+    EJAdevices = list(serial.tools.list_ports.grep("04b4:f232"))
+    #print(EJAdevices[0])
+    portstring = EJAdevices[0][0]
+    #print(portstring)
+    s = serial.Serial(portstring,250000,timeout=2)
 
 # Set up data
 channels = ["A","B","A'","B'"]
