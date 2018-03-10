@@ -40,13 +40,20 @@ plot = figure(plot_height=400, plot_width=800, title="Single counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
               x_range=channels, y_range=[0, 100000])
 
-plot.vbar(x='x', top='y', width=0.5, source=source)
+plot.background_fill_color = "black"
+plot.border_fill_color = "black"
+
+plot.vbar(x='x', top='y', width=0.5, source=source, color="red")
 
 plot2 = figure(plot_height=400, plot_width=800, title="Coincidence counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
               x_range=coinc, y_range=[0, 1000])
 
-plot2.vbar(x='x', top='y', width=0.5, source=source2)
+plot2.background_fill_color = "black"
+plot2.border_fill_color = "black"
+
+plot2.vbar(x='x', top='y', width=0.5, source=source2, color="yellow")
+
 
 # Set up widgets to control scale of plots
 # TODO change these to actual range sliders
@@ -56,8 +63,8 @@ scalemax = Slider(title="Singles Scale maximum", value=1000.0, start=1000.0, end
 scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.0, step=100)
 scalemax2 = Slider(title="Coinc. Scale maximum", value=1000.0, start=1000.0, end=100000.0, step=100)
 phase = Slider(title="phase", value=0.0, start=0.0, end=5.0, step=0.1)
-statsA = Paragraph(text="100", width=100, height=20)
-statsB = Paragraph(text="100", width=100, height=20)
+statsA = Paragraph(text="100", width=400, height=40)
+statsB = Paragraph(text="100", width=400, height=40)
 
 
 # Set up callbacks
@@ -74,7 +81,7 @@ def update_data():
     global last_time
     T = time.time() - last_time
     last_time = time.time()
-    print(T)
+    #print(T)
 
     # get data:
     if useSerial:
@@ -136,7 +143,7 @@ for w in [scalemin, scalemax, scalemin2, scalemax2]:
 countControls = widgetbox(command, scalemin, scalemax)
 coincControls = widgetbox(scalemin2,scalemax2)
 
-curdoc().add_root(row(countControls, plot, column(statsA, statsB), width=1250))
-curdoc().add_root(row(coincControls, plot2, width=1250))
+curdoc().add_root(row(countControls, plot, column(statsA, statsB), width=1400))
+curdoc().add_root(row(coincControls, plot2, width=1400))
 curdoc().title = "Coincidence"
 curdoc().add_periodic_callback(update_data, 100)
