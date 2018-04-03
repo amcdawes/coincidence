@@ -16,27 +16,31 @@ from bokeh.plotting import figure
 import serial
 import serial.tools.list_ports
 
-useSerial = False
+useSerial = True
 # To debug away from the device. True connects for real, False uses fake data
 
 if useSerial:
     # Use serial tools to find the port for the coincidence counter
     EJAdevices = list(serial.tools.list_ports.grep("04b4:f232"))
     portstring = EJAdevices[0][0]
+    #print(portstring)
     s = serial.Serial(portstring,250000,timeout=2)
 
 # Set up data
-channels = ["A","B","A'","B'"]
-coinc = ["C1","C2","C3","C4"]
+channels = ["A","B","B'","C"]
+coinc = ["AB","AB'","NA","ABB'"]
 counts = [0,0,0,0]
 source = ColumnDataSource(data=dict(x=channels, y=counts))
 source2 = ColumnDataSource(data=dict(x=coinc, y=counts))
 
 a = []
 b = []
+ab = []
+abp = []
+abbp = []
 
 # Set up plot
-plot = figure(plot_height=400, plot_width=800, title="Single counts",
+plot = figure(plot_height=400, plot_width=1000, title="Single counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
               x_range=channels, y_range=[0, 100000])
 
@@ -45,7 +49,7 @@ plot.border_fill_color = "black"
 
 plot.vbar(x='x', top='y', width=0.5, source=source, color="red")
 
-plot2 = figure(plot_height=400, plot_width=800, title="Coincidence counts",
+plot2 = figure(plot_height=400, plot_width=1000, title="Coincidence counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
               x_range=coinc, y_range=[0, 1000])
 
@@ -63,8 +67,10 @@ scalemax = Slider(title="Singles Scale maximum", value=1000.0, start=1000.0, end
 scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.0, step=100)
 scalemax2 = Slider(title="Coinc. Scale maximum", value=1000.0, start=1000.0, end=100000.0, step=100)
 phase = Slider(title="phase", value=0.0, start=0.0, end=5.0, step=0.1)
+points = Slider(title="data points", value=20, start=0, end=50, step=1)
 statsA = Paragraph(text="100", width=400, height=40)
 statsB = Paragraph(text="100", width=400, height=40)
+g2 = Paragraph(text="100", width=400, height=40)
 
 
 # Set up callbacks
@@ -75,6 +81,9 @@ def send_command(attrname, old, new):
 command.on_change('value', send_command)
 
 last_time = time.time()
+
+datapoints = 20
+
 def update_data():
     # TODO: store data in a stream for charting vs time
 
@@ -88,6 +97,7 @@ def update_data():
         s.write("c\n".encode())
         serialData = s.readline()
         data = [int(x) for x in serialData.decode('ascii').rstrip().split(' ')]
+        #print(data)
     else:
         mockdata = [80000,75043,1000,800,20,20,0,0,0]
         data = [random.rand()*x for x in mockdata]
@@ -98,11 +108,30 @@ def update_data():
 
     a.append(raw[0])
     b.append(raw[1])
-    if len(a) > 10: a.pop(0)
-    if len(b) > 10: b.pop(0)
+    ab.append(coinc[0])
+    abp.append(coinc[1])
+    abbp.append(coinc[3])
+
+    while len(a) > datapoints: a.pop(0)
+    while len(b) > datapoints: b.pop(0)
+    while len(ab) > datapoints: ab.pop(0)
+    while len(abp) > datapoints: abp.pop(0)
+    while len(abbp) > datapoints: abbp.pop(0)
+    print(a)
 
     statsA.text = "A: %d +/- %d" % (np.mean(a), np.std(a))
     statsB.text = "B: %d +/- %d" % (np.mean(b), np.std(b))
+    try:
+        g2value = (np.sum(a)*np.sum(abbp)) / (np.sum(ab) * np.sum(abp))
+    except ValueError:
+        print("value error calculating g2")
+        g2value = 0
+    try:
+        g2.text = "g(2) = %f" % ( g2value )
+        #TODO add std
+    except ValueError:
+        print("value error printing g2")
+        g2.text = "g(2) = NaN"
 
     #print(raw)
     plot.title.text = "A:%d B:%d" % (raw[0], raw[1])
@@ -113,20 +142,21 @@ def update_data():
     # k = freq.value
 
     # Generate the new curve
-    channels = ["A","B","A'","B'"]
-    chan2 = ["C1","C2","C3","C4"]
+    channels = ["A","B","B'","C"]
+    chan2 = ["AB","AB'","NA","ABB'"]
 
     source.data = dict(x=channels, y=raw)
     source2.data = dict(x=chan2, y=coinc)
 
 def update_scales(attrname, old, new):
-
+    global datapoints
     # Get the current slider values
     smin = scalemin.value
     smax = scalemax.value
     s2max = scalemax2.value
     s2min = scalemin2.value
     w = phase.value
+    datapoints = points.value
 
     #update()
 
@@ -135,7 +165,7 @@ def update_scales(attrname, old, new):
     plot2.y_range.start = s2min
     plot2.y_range.end = s2max
 
-for w in [scalemin, scalemax, scalemin2, scalemax2]:
+for w in [scalemin, scalemax, scalemin2, scalemax2, points]:
     w.on_change('value', update_scales)
 
 
@@ -143,7 +173,7 @@ for w in [scalemin, scalemax, scalemin2, scalemax2]:
 countControls = widgetbox(command, scalemin, scalemax)
 coincControls = widgetbox(scalemin2,scalemax2)
 
-curdoc().add_root(row(countControls, plot, column(statsA, statsB), width=1400))
-curdoc().add_root(row(coincControls, plot2, width=1400))
+curdoc().add_root(row(countControls, plot, column(statsA, statsB, g2, points), width=1800))
+curdoc().add_root(row(coincControls, plot2, width=1800))
 curdoc().title = "Coincidence"
 curdoc().add_periodic_callback(update_data, 100)
