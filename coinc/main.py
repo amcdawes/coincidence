@@ -67,7 +67,7 @@ scalemax = Slider(title="Singles Scale maximum", value=1000.0, start=1000.0, end
 scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.0, step=100)
 scalemax2 = Slider(title="Coinc. Scale maximum", value=1000.0, start=1000.0, end=100000.0, step=100)
 phase = Slider(title="phase", value=0.0, start=0.0, end=5.0, step=0.1)
-points = Slider(title="data points", value=20, start=0, end=50, step=1)
+points = Slider(title="data points", value=20, start=0, end=500, step=1)
 statsA = Paragraph(text="100", width=400, height=40)
 statsB = Paragraph(text="100", width=400, height=40)
 g2 = Paragraph(text="100", width=400, height=40)
@@ -117,18 +117,21 @@ def update_data():
     while len(ab) > datapoints: ab.pop(0)
     while len(abp) > datapoints: abp.pop(0)
     while len(abbp) > datapoints: abbp.pop(0)
-    print(a)
+    #print(a)
 
     statsA.text = "A: %d +/- %d" % (np.mean(a), np.std(a))
     statsB.text = "B: %d +/- %d" % (np.mean(b), np.std(b))
     try:
         g2value = (np.sum(a)*np.sum(abbp)) / (np.sum(ab) * np.sum(abp))
+        g2dev = g2value * np.sqrt((np.std(a) / np.mean(a))**2 +
+                            (np.std(abbp) / np.mean(abbp))**2 +
+                            (np.std(ab) / np.mean(ab))**2 +
+                            (np.std(abp) / np.mean(abp))**2)
     except ValueError:
         print("value error calculating g2")
         g2value = 0
     try:
-        g2.text = "g(2) = %f" % ( g2value )
-        #TODO add std
+        g2.text = "g(2) = %f +/- %f" % ( g2value, g2dev )
     except ValueError:
         print("value error printing g2")
         g2.text = "g(2) = NaN"
