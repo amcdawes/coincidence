@@ -90,7 +90,7 @@ def update_data():
     global last_time
     T = time.time() - last_time
     last_time = time.time()
-    #print(T)
+    print(T)
 
     # get data:
     if useSerial:
@@ -131,7 +131,7 @@ def update_data():
         print("value error calculating g2")
         g2value = 0
     try:
-        g2.text = "g(2) = %f +/- %f" % ( g2value, g2dev )
+        g2.text = "g(2) = %3.2f +/- %4.3f" % ( g2value, g2dev )
     except ValueError:
         print("value error printing g2")
         g2.text = "g(2) = NaN"
