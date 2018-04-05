@@ -1,11 +1,13 @@
 # Coincidence Counter
 ## An interface for the coincidence counter by Eric Ayars
 
+![Gif](https://github.com/amcdawes/coincidence/raw/master/screenshot.gif)
+
+### Other Requirements
+
 This software requires several additional python packages. To make it as simple as possible for anyone to use, I recommend starting with the [Anaconda python distribution](https://www.anaconda.com/download/) (free and easy to install).
 
 I am happy to help with that process, but it is fairly well documented, and very well-maintained software.
-
-### Other Requirements
 
 Once anaconda is installed, you will need two additional python libraries. These can be installed via the command line:
 
