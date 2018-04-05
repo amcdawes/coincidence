@@ -71,6 +71,7 @@ points = Slider(title="data points", value=20, start=0, end=500, step=1)
 statsA = Paragraph(text="100", width=400, height=40)
 statsB = Paragraph(text="100", width=400, height=40)
 g2 = Paragraph(text="100", width=400, height=40)
+g2_2d = Paragraph(text="100", width=400, height=40)
 
 
 # Set up callbacks
@@ -90,7 +91,7 @@ def update_data():
     global last_time
     T = time.time() - last_time
     last_time = time.time()
-    print(T)
+    #print(T)
 
     # get data:
     if useSerial:
@@ -124,6 +125,21 @@ def update_data():
     try:
         g2value = (np.sum(a)*np.sum(abbp)) / (np.sum(ab) * np.sum(abp))
         g2dev = g2value * np.sqrt((np.std(a) / np.mean(a))**2 +
+                            (np.std(abbp) / np.mean(abbp))**2 +
+                            (np.std(ab) / np.mean(ab))**2 +
+                            (np.std(abp) / np.mean(abp))**2)
+    except ValueError:
+        print("value error calculating g2")
+        g2value = 0
+    try:
+        g2.text = "g(2) = %3.2f +/- %4.3f" % ( g2value, g2dev )
+    except ValueError:
+        print("value error printing g2")
+        g2.text = "g(2) = NaN"
+
+    try:
+        g2_2d_value = (np.sum(bbp)*np.sum(abbp)) / (np.sum(ab) * np.sum(abp))
+        g2_2d_dev = g2value * np.sqrt((np.std(a) / np.mean(a))**2 +
                             (np.std(abbp) / np.mean(abbp))**2 +
                             (np.std(ab) / np.mean(ab))**2 +
                             (np.std(abp) / np.mean(abp))**2)
