@@ -5,14 +5,19 @@ This software requires several additional python packages. To make it as simple 
 
 I am happy to help with that process, but it is fairly well documented, and very well-maintained software.
 
+### Other Requirements
+
 Once anaconda is installed, you will need two additional python libraries. These can be installed via the command line:
 
 `conda install pyserial`
+
 `conda install bokeh`
 
 [Bokeh](https://bokeh.pydata.org/en/latest/) is a powerful visualization package for python. It includes web-based interfaces that provide widgets like sliders, graphs, and text-based readout for display of values.
 
-Plug the coincidence counter into a usb port. This software communicates via serial and is set up to request counts every 100 ms. Averages for A and B are displayed (with standard deviation). Also, the value of g(2) is calculated and assumes that the coincidence counter is configured for counting coincidences as follows:
+### Usage
+
+Plug the coincidence counter into a usb port. This software communicates via serial and is set up to request counts every 100 ms by sending the `c` command and parsing the serial response. Averages for A and B are displayed (with standard deviation). Also, the value of g(2) is calculated and assumes that the coincidence counter is configured for counting coincidences as follows:
 ```
 0:1000
 1:0100
@@ -25,11 +30,19 @@ Plug the coincidence counter into a usb port. This software communicates via ser
 ```
 In other words, counters 0-3 are singles counts for each input, and counters 4,5,6 are two-fold coincidences with the first input, and the 7th counter is a three-fold coincidence between the first three input. These can be set by sending serial commands to the coincidence unit. The full help text is listed below.
 
-To use this interface, run the following from the command line in the repository directory:
+There are sliders to control the plot scales, and a slider to set the number of data points to use in calculating the averages (and g(2) value). For displayed values the standard deviation is shown as well and is computed in real time using the selected number of data points.
+
+To run the interface, execute the following from the command line in the repository directory:
 
 `bokeh serve --show coinc`
 
-This starts a bokeh web server (running locally) and opens a web browser with the interface display.
+This starts a bokeh web server (running locally) and opens a web browser with the interface display. In the terminology of bokeh, `coinc` is an app, and this command is running (and showing) that app.
+
+## Hacking
+
+Feel free to modify, extend, and fix any of the code you see fit. As a guide, functions have some documentation, and comments are haphazardly scattered around the code to lend some insight. Please let me know if you have any questions.
+
+### References
 
 Commands for the coincidence unit, shown by sending command `h`:
 ```
