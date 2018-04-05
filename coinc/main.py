@@ -26,7 +26,7 @@ if useSerial:
     # Use serial tools to find the port for the coincidence counter
     # this is based on the information for my device, I hope it's true in general
     # there is a small chance this will find something else on your usb bus too
-    # but only if you have another device using the cyprus f232 chip.
+    # but only if you have another device using the same UID/VID.
     EJAdevices = list(serial.tools.list_ports.grep("04b4:f232"))
     portstring = EJAdevices[0][0]
     #print(portstring)
