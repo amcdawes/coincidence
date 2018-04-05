@@ -46,6 +46,7 @@ b = []
 ab = []
 abp = []
 abbp = []
+bbp = []
 
 # Set up plot
 plot = figure(plot_height=400, plot_width=1000, title="Single counts",
@@ -128,6 +129,7 @@ def update_data():
     ab.append(coinc[0])
     abp.append(coinc[1])
     abbp.append(coinc[3])
+    bbp.append(coinc[2]) # TODO fix the settings on coinc unit
 
     # resize this lists to keep only datapoints
     while len(a) > datapoints: a.pop(0)
@@ -135,6 +137,7 @@ def update_data():
     while len(ab) > datapoints: ab.pop(0)
     while len(abp) > datapoints: abp.pop(0)
     while len(abbp) > datapoints: abbp.pop(0)
+    while len(bbp) > datapoints: bbp.pop(0)
     #print(a)
 
     # set the A and B count displays
