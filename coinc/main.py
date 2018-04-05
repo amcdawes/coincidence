@@ -16,7 +16,7 @@ from bokeh.plotting import figure
 import serial
 import serial.tools.list_ports
 
-useSerial = True
+useSerial = False
 # To debug away from the device. True connects for real, False uses fake data
 
 if useSerial:
@@ -42,7 +42,7 @@ abbp = []
 # Set up plot
 plot = figure(plot_height=400, plot_width=1000, title="Single counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
-              x_range=channels, y_range=[0, 100000])
+              x_range=channels, y_range=[0, 70000])
 
 plot.background_fill_color = "black"
 plot.border_fill_color = "black"
@@ -51,7 +51,7 @@ plot.vbar(x='x', top='y', width=0.5, source=source, color="red")
 
 plot2 = figure(plot_height=400, plot_width=1000, title="Coincidence counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
-              x_range=coinc, y_range=[0, 1000])
+              x_range=coinc, y_range=[0, 4000])
 
 plot2.background_fill_color = "black"
 plot2.border_fill_color = "black"
@@ -63,9 +63,9 @@ plot2.vbar(x='x', top='y', width=0.5, source=source2, color="yellow")
 # TODO change these to actual range sliders
 command = TextInput(title="Command Entry:", value='raw counts')
 scalemin = Slider(title="Singles Scale minimum", value=0.0, start=0.0, end=1000.0, step=100)
-scalemax = Slider(title="Singles Scale maximum", value=1000.0, start=1000.0, end=500000.0, step=100)
+scalemax = Slider(title="Singles Scale maximum", value=70000.0, start=1000.0, end=500000.0, step=100)
 scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.0, step=100)
-scalemax2 = Slider(title="Coinc. Scale maximum", value=1000.0, start=1000.0, end=100000.0, step=100)
+scalemax2 = Slider(title="Coinc. Scale maximum", value=4000.0, start=1000.0, end=100000.0, step=100)
 phase = Slider(title="phase", value=0.0, start=0.0, end=5.0, step=0.1)
 points = Slider(title="data points", value=20, start=0, end=500, step=1)
 statsA = Paragraph(text="100", width=400, height=40)
@@ -99,8 +99,8 @@ def update_data():
         data = [int(x) for x in serialData.decode('ascii').rstrip().split(' ')]
         #print(data)
     else:
-        mockdata = [80000,75043,1000,800,20,20,0,0,0]
-        data = [random.rand()*x for x in mockdata]
+        mockdata = [57000,27000,27000,100,3000,3000,10,60,0]
+        data = [(1 + 0.1*random.rand())*x for x in mockdata]
 
     raw = data[0:4]
     coinc = data[4:8]
