@@ -82,7 +82,7 @@ phase = Slider(title="phase", value=0.0, start=0.0, end=5.0, step=0.1)
 points = Slider(title="data points", value=20, start=0, end=500, step=1)
 statsA = Paragraph(text="100", width=400, height=40)
 statsB = Paragraph(text="100", width=400, height=40)
-g2 = Paragraph(text="100", width=400, height=40)
+g2 = Paragraph(text="100", width=400, height=80)
 g2_2d = Paragraph(text="100", width=400, height=40)
 
 
@@ -171,7 +171,7 @@ def update_data():
         print("value error calculating g2")
         g2value = 0
     try:
-        g2.text = "g(2) = %3.2f +/- %4.3f" % ( g2value, g2dev )
+        g2.text = "g(2) = %3.2f +/- %4.3f (%2.2f st.devs)" % ( g2value, g2dev, (1-g2value)/g2dev )
     except ValueError:
         print("value error printing g2")
         g2.text = "g(2) = NaN"
