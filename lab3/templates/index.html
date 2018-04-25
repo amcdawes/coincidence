@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style>
+            @import url(https://fonts.googleapis.com/css?family=Noto+Sans);
+            body {
+              font-family: 'Noto Sans', sans-serif;
+              font-size: 20px;
+              -webkit-font-smoothing: antialiased;
+              text-rendering: optimizeLegibility;
+              color: #fff;
+              background-color: #222;
+             }
+             p {font-size: 36px;}
+        </style>
+        <meta charset="utf-8">
+        <title>Coincidence Counter</title>
+        {{ bokeh_css }}
+        {{ bokeh_js }}
+    </head>
+    <body>
+        {{ plot_div|indent(8) }}
+        {{ plot_script|indent(8) }}
+    </body>
+</html>

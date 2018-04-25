@@ -1,6 +1,8 @@
 '''
-A bokeh-based interface for Eric Ayars coincidence counter
-First-draft attempt at controls, graphs and values.
+A bokeh-based interface to collect photon interference data
+
+Assumes a newport newstep controller is available for the
+interferometer phase knob
 '''
 
 import numpy as np
@@ -28,17 +30,22 @@ if useSerial:
     # there is a small chance this will find something else on your usb bus too
     # but only if you have another device using the same UID/VID.
     EJAdevices = list(serial.tools.list_ports.grep("04b4:f232"))
-    portstring = EJAdevices[0][0]
-    print(portstring)
-    s = serial.Serial(portstring,250000,timeout=2)
+    EJAportstring = EJAdevices[0][0]
+    print("EJA at: ", EJAportstring)
+    # we connect via a Prolific Technology, Inc. PL2303 Serial Port:
+    NSdevices = list(serial.tools.list_ports.grep("067b:2303"))
+    NSportstring = NSdevices[0][0]
+    print("Found NewStep port at: ", NSportstring)
+    s = serial.Serial(EJAportstring,250000,timeout=2)
+    newstep = serial.Serial(NSportstring,baudrate=19200,xonxoff=True,rtscts=True,timeout=250)
 
 # Set up data variables and names
-channels = ["A","B","B'","C"]
-coinc = ["AB","AB'","NA","ABB'"]
-counts = [0,0,0,0]
+phase = [] #np.arange(-50,50,100)
+ABcounts = [] #np.zeros(len(phase))
+ABPcounts = [] #np.zeros(len(phase))
 # create bokeh data sources for the two graphs
-source = ColumnDataSource(data=dict(x=channels, y=counts))
-source2 = ColumnDataSource(data=dict(x=coinc, y=counts))
+source = ColumnDataSource(data=dict(x=phase, y=ABcounts))
+source2 = ColumnDataSource(data=dict(x=phase, y=ABPcounts))
 
 # these lists will be filled with the raw data
 a = []
@@ -47,26 +54,31 @@ ab = []
 abp = []
 abbp = []
 bbp = []
+abcounts = []
+abpcounts = []
+
 
 # Set up plot
 plot = figure(plot_height=400, plot_width=1000, title="Single counts",
-              tools="crosshair,pan,reset,save,wheel_zoom",
-              x_range=channels, y_range=[0, 70000])
+              tools="crosshair,pan,reset,save,wheel_zoom")
 
 # colors are dark for use in the dark optics labs
 plot.background_fill_color = "black"
 plot.border_fill_color = "black"
 
-plot.vbar(x='x', top='y', width=0.5, source=source, color="red")
+plot.scatter(x="x", y="y", radius=1,
+          fill_color="yellow", fill_alpha=0.6,
+          line_color="red", source=source)
 
 plot2 = figure(plot_height=400, plot_width=1000, title="Coincidence counts",
-              tools="crosshair,pan,reset,save,wheel_zoom",
-              x_range=coinc, y_range=[0, 4000])
+              tools="crosshair,pan,reset,save,wheel_zoom")
 
 plot2.background_fill_color = "black"
 plot2.border_fill_color = "black"
 
-plot2.vbar(x='x', top='y', width=0.5, source=source2, color="yellow")
+plot2.scatter(x="x", y="y", radius=1,
+          fill_color="yellow", fill_alpha=0.6,
+          line_color="yellow", source=source2)
 
 
 # Set up widgets to control scale of plots
@@ -78,7 +90,7 @@ scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.
 scalemax2 = Slider(title="Coinc. Scale maximum", value=4000.0, start=1000.0, end=100000.0, step=100)
 
 # other widgets (not all are used yet)
-phase = Slider(title="phase", value=0.0, start=0.0, end=5.0, step=0.1)
+setphase = Slider(title="phase", value=0, start=-50, end=50, step=1)
 points = Slider(title="data points", value=20, start=0, end=500, step=1)
 statsA = Paragraph(text="100", width=400, height=40)
 statsB = Paragraph(text="100", width=400, height=40)
@@ -99,6 +111,18 @@ last_time = time.time()
 # start out keeping 20 data points
 datapoints = 20
 
+def save_phase():
+    # store current phase value and the mean/stdev
+    # from latest run in new graph source
+    # TODO get current value from stepper:
+    
+    current_phase = 450
+    abcounts.append(np.mean(ab))
+    abpcounts.append(np.mean(abp))
+    phase.append(current_phase)
+    source.data = dict(x=phase, y=abcounts)
+    source2.data = dict(x=phase, y=abpcounts)
+
 def update_data():
     # TODO: store data in a stream for charting vs time
     # this function is called every 100 ms (set below if you want to change it)
@@ -115,6 +139,13 @@ def update_data():
         serialData = s.readline()
         data = [int(x) for x in serialData.decode('ascii').rstrip().split(' ')]
         #print(data)
+        # TODO replace with actual phase value from stepper:
+        if len(phase) == 0:
+            phase.append(0)
+        else:
+            newphase = phase[-1] + 4
+            phase.append(newphase)
+        #print(phase)
     else:
         mockdata = [57000,27000,27000,100,3000,3000,10,60,0]
         data = [(1 + 0.1*random.rand())*x for x in mockdata]
@@ -130,7 +161,6 @@ def update_data():
     abp.append(coinc[1])
     abbp.append(coinc[3])
     bbp.append(coinc[2]) # TODO fix the settings on coinc unit
-
     # resize this lists to keep only datapoints
     while len(a) > datapoints: a.pop(0)
     while len(b) > datapoints: b.pop(0)
@@ -180,12 +210,6 @@ def update_data():
 
     plot.title.text = "A:%d B:%d" % (raw[0], raw[1])
 
-    # Generate the new plots
-    channels = ["A","B","B'","C"]
-    chan2 = ["AB","AB'","NA","ABB'"]
-
-    source.data = dict(x=channels, y=raw)
-    source2.data = dict(x=chan2, y=coinc)
 
 def update_scales(attrname, old, new):
     global datapoints
@@ -195,7 +219,7 @@ def update_scales(attrname, old, new):
     smax = scalemax.value
     s2max = scalemax2.value
     s2min = scalemin2.value
-    w = phase.value
+    #w = phase.value
     datapoints = points.value
 
     plot.y_range.start = smin
@@ -219,3 +243,5 @@ curdoc().title = "Coincidence"
 
 # set the callback to pull the data every 100 ms:
 curdoc().add_periodic_callback(update_data, 100)
+# TODO add callback on button press to store ab and abp mean and stddev in new graph sources
+curdoc().add_periodic_callback(save_phase, 1000)
