@@ -19,7 +19,7 @@ from bokeh.plotting import figure
 import serial
 import serial.tools.list_ports
 
-useSerial = True
+useSerial = False
 # To debug away from the device. True connects for real, False uses fake data
 # If the counter is not connected, you can set this to False in order to try it
 # out, or edit the calculations etc.
@@ -115,8 +115,14 @@ def save_phase():
     # store current phase value and the mean/stdev
     # from latest run in new graph source
     # TODO get current value from stepper:
-    
-    current_phase = 450
+    if useSerial:
+        newstep.write("1PA?\r\n".encode())
+        phaseBytes = newstep.readline()
+        # returns in the form: b'\r1PA? 46774\n'
+        phaseString = phaseBytes.decode("utf-8")
+        current_phase = int(phaseString.split(" ")[1])
+    else:
+        current_phase = 4000 + 10*np.random.randint(10)
     abcounts.append(np.mean(ab))
     abpcounts.append(np.mean(abp))
     phase.append(current_phase)
