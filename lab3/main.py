@@ -144,14 +144,6 @@ def update_data():
         s.write("c\n".encode())
         serialData = s.readline()
         data = [int(x) for x in serialData.decode('ascii').rstrip().split(' ')]
-        #print(data)
-        # TODO replace with actual phase value from stepper:
-        if len(phase) == 0:
-            phase.append(0)
-        else:
-            newphase = phase[-1] + 4
-            phase.append(newphase)
-        #print(phase)
     else:
         mockdata = [57000,27000,27000,100,3000,3000,10,60,0]
         data = [(1 + 0.1*random.rand())*x for x in mockdata]
