@@ -19,7 +19,7 @@ from bokeh.plotting import figure
 import serial
 import serial.tools.list_ports
 
-useSerial = False
+useSerial = True
 # To debug away from the device. True connects for real, False uses fake data
 # If the counter is not connected, you can set this to False in order to try it
 # out, or edit the calculations etc.
@@ -37,7 +37,7 @@ if useSerial:
     NSportstring = NSdevices[0][0]
     print("Found NewStep port at: ", NSportstring)
     s = serial.Serial(EJAportstring,250000,timeout=2)
-    newstep = serial.Serial(NSportstring,baudrate=19200,xonxoff=True,rtscts=True,timeout=250)
+    newstep = serial.Serial(NSportstring,baudrate=19200,xonxoff=True,rtscts=True,timeout=1)
 
 # Set up data variables and names
 phase = [] #np.arange(-50,50,100)
@@ -77,7 +77,7 @@ plot.xaxis.major_label_text_color = "white"
 plot.background_fill_color = "MidnightBlue"
 plot.border_fill_color = "MidnightBlue"
 
-plot.scatter(x="x", y="y", radius="d",
+plot.scatter(x="x", y="y", radius=0.5,
           fill_color="green", fill_alpha=0.3,
           line_color="white", source=source)
 
@@ -94,7 +94,7 @@ plot2.xaxis.major_label_text_color = "white"
 plot2.background_fill_color = "MidnightBlue"
 plot2.border_fill_color = "MidnightBlue"
 
-plot2.scatter(x="x", y="y", radius="d",
+plot2.scatter(x="x", y="y", radius=0.5,
           fill_color="blue", fill_alpha=0.3,
           line_color="white", source=source2)
 
@@ -108,7 +108,7 @@ scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.
 scalemax2 = Slider(title="Coinc. Scale maximum", value=4000.0, start=1000.0, end=100000.0, step=100)
 
 # other widgets (not all are used yet)
-setphase = Slider(title="phase", value=5000, start=4000, end=6000, step=100)
+setphase = Slider(title="phase", value=37765, start=37700, end=37800, step=5)
 points = Slider(title="data points", value=20, start=0, end=500, step=1)
 statsA = Paragraph(text="100", width=400, height=40)
 statsB = Paragraph(text="100", width=400, height=40)
