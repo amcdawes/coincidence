@@ -19,7 +19,7 @@ from bokeh.plotting import figure
 import serial
 import serial.tools.list_ports
 
-useSerial = False
+useSerial = True
 # To debug away from the device. True connects for real, False uses fake data
 # If the counter is not connected, you can set this to False in order to try it
 # out, or edit the calculations etc.
@@ -42,10 +42,13 @@ if useSerial:
 # Set up data variables and names
 phase = [] #np.arange(-50,50,100)
 ABcounts = [] #np.zeros(len(phase))
+deltaABcounts = []
 ABPcounts = [] #np.zeros(len(phase))
+deltaABPcounts = []
+
 # create bokeh data sources for the two graphs
-source = ColumnDataSource(data=dict(x=phase, y=ABcounts))
-source2 = ColumnDataSource(data=dict(x=phase, y=ABPcounts))
+source = ColumnDataSource(data=dict(x=phase, y=ABcounts, d=deltaABcounts))
+source2 = ColumnDataSource(data=dict(x=phase, y=ABPcounts, d=deltaABPcounts))
 
 # these lists will be filled with the raw data
 a = []
@@ -66,7 +69,7 @@ plot = figure(plot_height=400, plot_width=1000, title="Single counts",
 plot.background_fill_color = "black"
 plot.border_fill_color = "black"
 
-plot.scatter(x="x", y="y", radius=1,
+plot.scatter(x="x", y="y", radius="d",
           fill_color="yellow", fill_alpha=0.6,
           line_color="red", source=source)
 
@@ -76,7 +79,7 @@ plot2 = figure(plot_height=400, plot_width=1000, title="Coincidence counts",
 plot2.background_fill_color = "black"
 plot2.border_fill_color = "black"
 
-plot2.scatter(x="x", y="y", radius=1,
+plot2.scatter(x="x", y="y", radius="d",
           fill_color="yellow", fill_alpha=0.6,
           line_color="yellow", source=source2)
 
@@ -124,10 +127,12 @@ def save_phase():
     else:
         current_phase = 4000 + 10*np.random.randint(10)
     abcounts.append(np.mean(ab))
+    deltaABcounts.append(np.std(ab))
     abpcounts.append(np.mean(abp))
+    deltaABPcounts.append(np.std(ab))
     phase.append(current_phase)
-    source.data = dict(x=phase, y=abcounts)
-    source2.data = dict(x=phase, y=abpcounts)
+    source.data = dict(x=phase, y=abcounts, d=deltaABcounts)
+    source2.data = dict(x=phase, y=abpcounts, d=deltaABPcounts)
 
 def update_data():
     # TODO: store data in a stream for charting vs time
