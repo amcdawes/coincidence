@@ -19,7 +19,7 @@ from bokeh.plotting import figure
 import serial
 import serial.tools.list_ports
 
-useSerial = True
+useSerial = False
 # To debug away from the device. True connects for real, False uses fake data
 # If the counter is not connected, you can set this to False in order to try it
 # out, or edit the calculations etc.
@@ -65,23 +65,38 @@ abpcounts = []
 plot = figure(plot_height=400, plot_width=1000, title="Single counts",
               tools="crosshair,pan,reset,save,wheel_zoom")
 
+plot.ygrid.grid_line_alpha = 0.3
+plot.xgrid.grid_line_alpha = 0.3
+plot.yaxis.axis_label = "AB Coincidence Counts"
+plot.yaxis.axis_label_text_color = "white"
+plot.yaxis.major_label_text_color = "white"
+plot.yaxis.axis_label_text_color = "white"
+plot.xaxis.major_label_text_color = "white"
+
 # colors are dark for use in the dark optics labs
-plot.background_fill_color = "black"
-plot.border_fill_color = "black"
+plot.background_fill_color = "MidnightBlue"
+plot.border_fill_color = "MidnightBlue"
 
 plot.scatter(x="x", y="y", radius="d",
-          fill_color="yellow", fill_alpha=0.6,
-          line_color="red", source=source)
+          fill_color="green", fill_alpha=0.3,
+          line_color="white", source=source)
 
 plot2 = figure(plot_height=400, plot_width=1000, title="Coincidence counts",
               tools="crosshair,pan,reset,save,wheel_zoom")
 
-plot2.background_fill_color = "black"
-plot2.border_fill_color = "black"
+plot2.ygrid.grid_line_alpha = 0.3
+plot2.xgrid.grid_line_alpha = 0.3
+plot2.yaxis.axis_label = "AB' Coincidence Counts"
+plot2.yaxis.axis_label_text_color = "white"
+plot2.yaxis.major_label_text_color = "white"
+plot2.xaxis.major_label_text_color = "white"
+
+plot2.background_fill_color = "MidnightBlue"
+plot2.border_fill_color = "MidnightBlue"
 
 plot2.scatter(x="x", y="y", radius="d",
-          fill_color="yellow", fill_alpha=0.6,
-          line_color="yellow", source=source2)
+          fill_color="blue", fill_alpha=0.3,
+          line_color="white", source=source2)
 
 
 # Set up widgets to control scale of plots
@@ -93,10 +108,12 @@ scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.
 scalemax2 = Slider(title="Coinc. Scale maximum", value=4000.0, start=1000.0, end=100000.0, step=100)
 
 # other widgets (not all are used yet)
-setphase = Slider(title="phase", value=0, start=-50, end=50, step=1)
+setphase = Slider(title="phase", value=5000, start=4000, end=6000, step=100)
 points = Slider(title="data points", value=20, start=0, end=500, step=1)
 statsA = Paragraph(text="100", width=400, height=40)
 statsB = Paragraph(text="100", width=400, height=40)
+statsAB = Paragraph(text="100", width=400, height=40)
+statsABP = Paragraph(text="100", width=400, height=40)
 g2 = Paragraph(text="100", width=400, height=80)
 g2_2d = Paragraph(text="100", width=400, height=40)
 
@@ -114,10 +131,27 @@ last_time = time.time()
 # start out keeping 20 data points
 datapoints = 20
 
+def set_phase(attrname, old, new):
+    targetPhase = setphase.value
+    print("stepper going to: ", targetPhase)
+    if useSerial:
+        phaseString = "1PA%d\r\n" % targetPhase
+        print(phaseString)
+        newstep.write(phaseString.encode()) # set the phase
+        newstep.write("1PA?\r\n".encode()) # ask current phase
+        # TODO this is going to break, the phase can't be negative
+        phaseBytes = newstep.readline()
+        # returns in the form: b'\r1PA? 46774\n'
+        phaseString = phaseBytes.decode("utf-8")
+        current_phase = int(phaseString.split(" ")[1])
+    else:
+        # assume phase from slider
+        current_phase = setphase.value
+
 def save_phase():
     # store current phase value and the mean/stdev
     # from latest run in new graph source
-    # TODO get current value from stepper:
+    # get current value from stepper:
     if useSerial:
         newstep.write("1PA?\r\n".encode())
         phaseBytes = newstep.readline()
@@ -125,9 +159,11 @@ def save_phase():
         phaseString = phaseBytes.decode("utf-8")
         current_phase = int(phaseString.split(" ")[1])
     else:
-        current_phase = 4000 + 10*np.random.randint(10)
+        # assume phase from slider
+        current_phase = setphase.value
     abcounts.append(np.mean(ab))
     deltaABcounts.append(np.std(ab))
+    #print(deltaABcounts)
     abpcounts.append(np.mean(abp))
     deltaABPcounts.append(np.std(ab))
     phase.append(current_phase)
@@ -176,6 +212,8 @@ def update_data():
     # set the A and B count displays
     statsA.text = "A: %d +/- %d" % (np.mean(a), np.std(a))
     statsB.text = "B: %d +/- %d" % (np.mean(b), np.std(b))
+    statsAB.text = "AB: %d +/- %d" % (np.mean(ab), np.std(ab))
+    statsABP.text = "AB': %d +/- %d" % (np.mean(abp), np.std(abp))
 
     # calculate g(2):
     try:
@@ -234,13 +272,14 @@ def update_scales(attrname, old, new):
 for w in [scalemin, scalemax, scalemin2, scalemax2, points]:
     w.on_change('value', update_scales)
 
+setphase.on_change('value', set_phase)
 
 # Set up layouts and add to document
 countControls = widgetbox(command, scalemin, scalemax)
 coincControls = widgetbox(scalemin2,scalemax2)
 
 # build the app document, this is just layout control and arranging the interface
-curdoc().add_root(row(countControls, plot, column(statsA, statsB, g2, points), width=1800))
+curdoc().add_root(row(countControls, plot, column(statsA, statsB, g2, points, statsAB, statsABP, setphase), width=1800))
 curdoc().add_root(row(coincControls, plot2, width=1800))
 curdoc().title = "Coincidence"
 
