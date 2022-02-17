@@ -10,7 +10,7 @@ import time
 from bokeh.io import curdoc
 from bokeh.layouts import row, widgetbox, column
 from bokeh.models import ColumnDataSource, Range1d
-from bokeh.models.widgets import Slider, TextInput, Paragraph
+from bokeh.models.widgets import Slider, TextInput, Paragraph, Div
 from bokeh.plotting import figure
 
 
@@ -49,7 +49,7 @@ abbp = []
 bbp = []
 
 # Set up plot
-plot = figure(plot_height=400, plot_width=1000, title="Single counts",
+plot = figure(plot_height=360, plot_width=800, title="Single counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
               x_range=channels, y_range=[0, 400000])
 
@@ -59,7 +59,7 @@ plot.border_fill_color = "black"
 
 plot.vbar(x='x', top='y', width=0.5, source=source, color="red")
 
-plot2 = figure(plot_height=400, plot_width=1000, title="Coincidence counts",
+plot2 = figure(plot_height=360, plot_width=800, title="Coincidence counts",
               tools="crosshair,pan,reset,save,wheel_zoom",
               x_range=coinc, y_range=[0, 40000])
 
@@ -72,19 +72,19 @@ plot2.vbar(x='x', top='y', width=0.5, source=source2, color="yellow")
 # Set up widgets to control scale of plots
 # TODO change these to actual range sliders
 command = TextInput(title="Command Entry:", value='raw counts')
-scalemin = Slider(title="Singles Scale minimum", value=0.0, start=0.0, end=1000.0, step=100)
-scalemax = Slider(title="Singles Scale maximum", value=400000.0, start=1000.0, end=500000.0, step=100)
-scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=1000.0, step=100)
-scalemax2 = Slider(title="Coinc. Scale maximum", value=30000.0, start=1000.0, end=50000.0, step=100)
+scalemin = Slider(title="A/B Scale min", value=0.0, start=0.0, end=1000.0, step=100)
+scalemax = Slider(title="A/B Scale max", value=400000.0, start=1000.0, end=500000.0, step=100)
+scalemin2 = Slider(title="AB Scale min", value=0.0, start=0.0, end=1000.0, step=100)
+scalemax2 = Slider(title="AB Scale max", value=30000.0, start=1000.0, end=50000.0, step=100)
 
 # other widgets (not all are used yet)
 phase = Slider(title="phase", value=0.0, start=0.0, end=5.0, step=0.1)
-points = Slider(title="data points", value=20, start=0, end=500, step=1)
-statsA = Paragraph(text="100", width=400, height=40)
-statsB = Paragraph(text="100", width=400, height=40)
-statsAB = Paragraph(text="100", width=400, height=40)
-g2 = Paragraph(text="100", width=400, height=80)
-g2_2d = Paragraph(text="100", width=400, height=40)
+points = Slider(title="data points", value=20, start=10, end=300, step=10, width=200)
+statsA = Div(text="100", width=250, height=40, style={'font-size': '150%'})
+statsB = Div(text="100", width=250, height=40, style={'font-size': '150%'})
+statsAB = Div(text="100", width=250, height=40, style={'font-size': '150%'})
+g2 = Paragraph(text="100", width=200, height=80, style={'font-size': '150%'})
+g2_2d = Paragraph(text="100", width=250, height=40, style={'font-size': '150%'})
 
 
 # Set up callbacks
@@ -211,12 +211,12 @@ for w in [scalemin, scalemax, scalemin2, scalemax2, points]:
 
 
 # Set up layouts and add to document
-countControls = widgetbox(command, scalemin, scalemax)
-coincControls = widgetbox(scalemin2,scalemax2)
+countControls = column(command, scalemin, scalemax, width=150)
+coincControls = column(scalemin2,scalemax2, width=150)
 
 # build the app document, this is just layout control and arranging the interface
-curdoc().add_root(row(countControls, plot, column(statsA, statsB, statsAB, g2, points), width=1800))
-curdoc().add_root(row(coincControls, plot2, width=1800))
+curdoc().add_root(row(countControls, plot, column(statsA, statsB, statsAB, g2, points), width=1200))
+curdoc().add_root(row(coincControls, plot2, width=1200))
 curdoc().title = "Coincidence"
 
 # set the callback to pull the data every 100 ms:
