@@ -108,7 +108,7 @@ scalemin2 = Slider(title="Coinc. Scale minimum", value=0.0, start=0.0, end=5000.
 scalemax2 = Slider(title="Coinc. Scale maximum", value=4000.0, start=1000.0, end=100000.0, step=100)
 
 # other widgets (not all are used yet)
-setphase = Slider(title="phase", value=37765, start=37700, end=37800, step=5)
+setphase = Slider(title="phase", value=37650, start=37550, end=37750, step=10)
 points = Slider(title="data points", value=20, start=0, end=500, step=1)
 statsA = Paragraph(text="100", width=400, height=40)
 statsB = Paragraph(text="100", width=400, height=40)
