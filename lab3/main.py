@@ -14,12 +14,13 @@ from bokeh.layouts import row, widgetbox, column
 from bokeh.models import ColumnDataSource, Range1d
 from bokeh.models.widgets import Slider, TextInput, Paragraph
 from bokeh.plotting import figure
+from bokeh.colors import RGB
 
 
 import serial
 import serial.tools.list_ports
 
-useSerial = True
+useSerial = False
 # To debug away from the device. True connects for real, False uses fake data
 # If the counter is not connected, you can set this to False in order to try it
 # out, or edit the calculations etc.
@@ -74,8 +75,8 @@ plot.yaxis.axis_label_text_color = "white"
 plot.xaxis.major_label_text_color = "white"
 
 # colors are dark for use in the dark optics labs
-plot.background_fill_color = "MidnightBlue"
-plot.border_fill_color = "MidnightBlue"
+plot.background_fill_color = RGB(16,33,77)
+plot.border_fill_color = RGB(16,33,77)
 
 plot.scatter(x="x", y="y", radius=0.5,
           fill_color="green", fill_alpha=0.3,
@@ -91,8 +92,8 @@ plot2.yaxis.axis_label_text_color = "white"
 plot2.yaxis.major_label_text_color = "white"
 plot2.xaxis.major_label_text_color = "white"
 
-plot2.background_fill_color = "MidnightBlue"
-plot2.border_fill_color = "MidnightBlue"
+plot2.background_fill_color = RGB(16,33,77)
+plot2.border_fill_color = RGB(16,33,77)
 
 plot2.scatter(x="x", y="y", radius=0.5,
           fill_color="blue", fill_alpha=0.3,
