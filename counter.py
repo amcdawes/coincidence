@@ -10,8 +10,8 @@ import serial.tools.list_ports
 
 class CoincidenceCounter(object):
     # Set up data variables and names
-    channels = ["A","B","B'","C"]
-    coinc = ["AB","AB'","NA","ABB'"]
+    singleLabels = ["A","B","B'","C"]
+    coincLabels = ["AB","AB'","NA","ABB'"]
     counts = [0,0,0,0]
 
     # these lists will be filled with the raw data
