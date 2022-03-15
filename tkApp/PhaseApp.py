@@ -9,31 +9,40 @@ from tkinter import *
 class phaseController():
     position = 0
     pcSer = serial.Serial("/dev/ttyS0",baudrate=19200,xonxoff=True,rtscts=True,timeout=1)
+    pcSer.write("1PA?\r".encode())
+    print(pcSer.readline())
 
     def get_position(self):
         # get the current position from the controller
         print("get pos")
-        pcSer.write("1PA?".encode())
-        answer = pcSer.readline()
-        print(answer)
+        self.pcSer.write("1PA?\r".encode())
+        answer = self.pcSer.readline()
+        self.position = int(str(answer).split()[-1].rstrip("\\n'"))
+        print(self.position)
         updatePhaseText(self.position)
         
     def plus_position(self):
         # move forward 10 units
         print("plus")
         self.position+=20
-        pcSer.write("1PR20".encode())
-        answer = pcSer.readline()
-        print(answer)
+        self.pcSer.write("1PR20\r".encode())
+        answer = self.pcSer.readline()
+        self.pcSer.write("1PA?\r".encode())
+        answer = self.pcSer.readline()
+        self.position = int(str(answer).split()[-1].rstrip("\\n'"))
+        print(self.position)
         updatePhaseText(self.position)
 
     def minus_position(self):
         # move backward 10 units
         print("minus")
         self.position-=10
-        pcSer.write("1PR-20".encode())
-        answer = pcSer.readline()
-        print(answer)        
+        self.pcSer.write("1PR-20\r".encode())
+        answer = self.pcSer.readline()
+        self.pcSer.write("1PA?\r".encode())
+        answer = self.pcSer.readline()
+        self.position = int(str(answer).split()[-1].rstrip("\\n'"))
+        print(self.position)     
         updatePhaseText(self.position)
 
 def updatePhaseText(text):
@@ -44,7 +53,7 @@ pc = phaseController()
 
 main_window = Tk()
 main_window.configure(background='grey')
-main_window.iconbitmap('lardmon_icon.ico')
+#main_window.iconbitmap('lardmon_icon.ico')
 main_window.title("Phase Controller")
 main_window.geometry('600x150')
 main_window.resizable(width=False, height=False)
