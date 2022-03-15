@@ -17,7 +17,7 @@ from bokeh.plotting import figure
 import serial
 import serial.tools.list_ports
 
-useSerial = True
+useSerial = False
 # To debug away from the device. True connects for real, False uses fake data
 # If the counter is not connected, you can set this to False in order to try it
 # out, or edit the calculations etc.
