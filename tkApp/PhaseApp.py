@@ -24,8 +24,8 @@ class phaseController():
     def plus_position(self):
         # move forward 10 units
         print("plus")
-        self.position+=20
-        self.pcSer.write("1PR20\r".encode())
+        #self.position+=20
+        self.pcSer.write("1PR10\r".encode())
         answer = self.pcSer.readline()
         self.pcSer.write("1PA?\r".encode())
         answer = self.pcSer.readline()
@@ -36,8 +36,8 @@ class phaseController():
     def minus_position(self):
         # move backward 10 units
         print("minus")
-        self.position-=10
-        self.pcSer.write("1PR-20\r".encode())
+        #self.position-=10
+        self.pcSer.write("1PR-10\r".encode())
         answer = self.pcSer.readline()
         self.pcSer.write("1PA?\r".encode())
         answer = self.pcSer.readline()

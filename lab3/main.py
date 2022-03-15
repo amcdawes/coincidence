@@ -5,6 +5,7 @@ Assumes a newport newstep controller is available for the
 interferometer phase knob
 '''
 
+from re import I
 import numpy as np
 
 import numpy.random as random
@@ -34,11 +35,10 @@ if useSerial:
     EJAportstring = EJAdevices[0][0]
     print("EJA at: ", EJAportstring)
     # we connect via a Prolific Technology, Inc. PL2303 Serial Port:
-    NSdevices = list(serial.tools.list_ports.grep("067b:2303"))
-    NSportstring = NSdevices[0][0]
-    print("Found NewStep port at: ", NSportstring)
+    #NSdevices = list(serial.tools.list_ports.grep("067b:2303"))
+    # replaced with direct connection:
     s = serial.Serial(EJAportstring,250000,timeout=2)
-    newstep = serial.Serial(NSportstring,baudrate=19200,xonxoff=True,rtscts=True,timeout=1)
+    newstep = serial.Serial("/dev/ttyS0",baudrate=19200,xonxoff=True,rtscts=True,timeout=1)
 
 # Set up data variables and names
 phase = [] #np.arange(-50,50,100)
@@ -132,6 +132,21 @@ last_time = time.time()
 # start out keeping 20 data points
 datapoints = 20
 
+
+def get_phase():
+    if useSerial:
+        newstep.write("1PA?\r\n".encode()) # ask current phase
+        # TODO this is going to break, the phase can't be negative
+        phaseBytes = newstep.readline()
+        # returns in the form: b'\r1PA? 46774\n'
+        phaseString = phaseBytes.decode("utf-8")
+        current_phase = int(phaseString.split(" ")[1])
+        print(current_phase)
+        setphase.value = current_phase
+    else:
+        # assume phase from slider
+        current_phase = setphase.value
+
 def set_phase(attrname, old, new):
     targetPhase = setphase.value
     print("stepper going to: ", targetPhase)
@@ -172,6 +187,7 @@ def save_phase():
     source2.data = dict(x=phase, y=abpcounts, d=deltaABPcounts)
 
 def update_data():
+    get_phase()
     # TODO: store data in a stream for charting vs time
     # this function is called every 100 ms (set below if you want to change it)
 

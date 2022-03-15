@@ -83,6 +83,7 @@ points = Slider(title="data points", value=20, start=10, end=300, step=10, width
 statsA = Div(text="100", width=250, height=40, style={'font-size': '150%'})
 statsB = Div(text="100", width=250, height=40, style={'font-size': '150%'})
 statsAB = Div(text="100", width=250, height=40, style={'font-size': '150%'})
+statsABP = Div(text="100", width=250, height=40, style={'font-size': '150%'})
 g2 = Paragraph(text="100", width=200, height=80, style={'font-size': '150%'})
 g2_2d = Paragraph(text="100", width=250, height=40, style={'font-size': '150%'})
 
@@ -146,6 +147,7 @@ def update_data():
     statsA.text = "A: %d +/- %d" % (np.mean(a), np.std(a))
     statsB.text = "B: %d +/- %d" % (np.mean(b), np.std(b))
     statsAB.text = "AB: %d +/- %d" % (np.mean(ab), np.std(ab))
+    statsABP.text = "AB': %d +/- %d" % (np.mean(abp), np.std(abp))
     # calculate g(2):
     try:
         g2value = (np.sum(a)*np.sum(abbp)) / (np.sum(ab) * np.sum(abp))
@@ -215,7 +217,7 @@ countControls = column(command, scalemin, scalemax, width=150)
 coincControls = column(scalemin2,scalemax2, width=150)
 
 # build the app document, this is just layout control and arranging the interface
-curdoc().add_root(row(countControls, plot, column(statsA, statsB, statsAB, g2, points), width=1200))
+curdoc().add_root(row(countControls, plot, column(statsA, statsB, statsAB, statsABP, g2, points), width=1200))
 curdoc().add_root(row(coincControls, plot2, width=1200))
 curdoc().title = "Coincidence"
 
