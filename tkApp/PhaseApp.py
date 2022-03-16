@@ -12,12 +12,16 @@ class phaseController():
     pcSer.write("1PA?\r".encode())
     print(pcSer.readline())
 
+
+
     def get_position(self):
         # get the current position from the controller
         print("get pos")
         self.pcSer.write("1PA?\r".encode())
-        answer = self.pcSer.readline()
-        self.position = int(str(answer).split()[-1].rstrip("\\n'"))
+        # read until return (interface sends \n\r so readline doesn't work)
+        answer = self.pcSer.read_until(b'\r')
+        # decode bytes to string, pull out value as int:
+        self.position = int(answer.decode().split()[-1])
         print(self.position)
         updatePhaseText(self.position)
         
@@ -26,24 +30,16 @@ class phaseController():
         print("plus")
         #self.position+=20
         self.pcSer.write("1PR10\r".encode())
-        answer = self.pcSer.readline()
-        self.pcSer.write("1PA?\r".encode())
-        answer = self.pcSer.readline()
-        self.position = int(str(answer).split()[-1].rstrip("\\n'"))
-        print(self.position)
-        updatePhaseText(self.position)
+        answer = self.pcSer.read_until(b'\r')
+        self.get_position()
 
     def minus_position(self):
         # move backward 10 units
         print("minus")
         #self.position-=10
         self.pcSer.write("1PR-10\r".encode())
-        answer = self.pcSer.readline()
-        self.pcSer.write("1PA?\r".encode())
-        answer = self.pcSer.readline()
-        self.position = int(str(answer).split()[-1].rstrip("\\n'"))
-        print(self.position)     
-        updatePhaseText(self.position)
+        answer = self.pcSer.read_until(b'\r')
+        self.get_position()
 
 def updatePhaseText(text):
     phaseDisplay.delete(1.0,"end")
