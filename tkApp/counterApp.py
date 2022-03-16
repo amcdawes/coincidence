@@ -17,22 +17,31 @@ data = []
 
 def start_plot():
     cc.update_data()
-    data = cc.a
-    data2 = cc.ab
+    a_data = cc.a
+    ab_data = cc.ab
+    abp_data = cc.abp
     ax.clear() # this clears too much, gridlines and labels, tried del ax.lines but warning
-    ax.plot(data, color="blue")
+    ax.plot(a_data, color="blue")
+    ax.set_ylim(0,350000)
     canvas.draw_idle()
     ax2.clear()
     ax2.bar(x=cc.singleLabels, height=cc.singles, color="red")
+    ax2.set_ylim(0,350000)
     canvas2.draw_idle()
+    ax3.clear()
+    ax3.plot(ab_data, color="green")
+    ax3.plot(abp_data, color="magenta")
+    ax3.set_ylim(0,20000)
+    canvas3.draw_idle()
     ax4.clear()
     ax4.bar(x=cc.coincLabels, height=cc.coinc, color="orange")
+    ax4.set_ylim(0,20000)
     canvas4.draw_idle()
     main_window.after(100, start_plot) # in milliseconds, 1000 for 1 second
 
 main_window = Tk()
 main_window.configure(background='grey')
-main_window.iconbitmap('lardmon_icon.ico')
+#main_window.iconbitmap('lardmon_icon.ico')
 main_window.title("Coincidence")
 main_window.geometry('1300x800')
 main_window.resizable(width=False, height=False)

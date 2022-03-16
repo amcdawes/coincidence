@@ -46,7 +46,6 @@ class CoincidenceCounter(object):
                 print("Using real data")
         except Exception as e:
             print(e)
-        else:
             self.useSerial = False
             print("Using fake data")
 
@@ -68,7 +67,7 @@ class CoincidenceCounter(object):
         if self.useSerial:
             self._ser.write("c\n".encode())
             serialData = self._ser.readline()
-            data = [int(x) for x in serialData.decode('ascii').rstrip().split(' ')]
+            data = [int(x)/T for x in serialData.decode('ascii').rstrip().split(' ')]
             #print(data)
         else:
             mockdata = [57000,27000,27000,100,3000,3000,10,60,0]
