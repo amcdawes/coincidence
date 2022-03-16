@@ -24,6 +24,14 @@ class phaseController():
         self.position = int(answer.decode().split()[-1])
         print(self.position)
         updatePhaseText(self.position)
+
+    #TODO create a button and text field for this!
+    def set_position(self,intposition):
+        # send command to go to a specific absolute position
+        print("setting position")
+        commandString = "1PA" + str(intposition) + "\r"
+        self.pcSer.write(commandString.encode())
+        self.get_position()
         
     def plus_position(self):
         # move forward 10 units
