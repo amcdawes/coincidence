@@ -8,7 +8,7 @@ import serial as sr
 import numpy as np
 
 from tkinter import *
-from counter import CoincidenceCounter
+from coincCounter import CoincidenceCounter
 from countPlotter import countFig
 
 cc = CoincidenceCounter()
@@ -37,7 +37,7 @@ def start_plot():
     ax4.bar(x=cc.coincLabels, height=cc.coinc, color="orange")
     ax4.set_ylim(0,20000)
     canvas4.draw_idle()
-    main_window.after(100, start_plot) # in milliseconds, 1000 for 1 second
+    main_window.after(10, start_plot) # in milliseconds, 1000 for 1 second
 
 main_window = Tk()
 main_window.configure(background='grey')
