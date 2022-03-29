@@ -8,11 +8,7 @@ from tkinter import *
 
 class phaseController():
     position = 0
-    pcSer = serial.Serial("/dev/ttyS0",baudrate=19200,xonxoff=True,rtscts=True,timeout=1)
-    pcSer.write("1PA?\r".encode())
-    print(pcSer.readline())
-
-
+    pcSer = serial.Serial("/dev/ttyS0",baudrate=19200,xonxoff=True,rtscts=True,timeout=0.1)
 
     def get_position(self):
         # get the current position from the controller
@@ -21,9 +17,12 @@ class phaseController():
         # read until return (interface sends \n\r so readline doesn't work)
         answer = self.pcSer.read_until(b'\r')
         # decode bytes to string, pull out value as int:
-        self.position = int(answer.decode().split()[-1])
-        print(self.position)
-        updatePhaseText(self.position)
+        try:
+            self.position = int(answer.decode().split()[-1])
+            print(self.position)
+            updatePhaseText(self.position)
+        except:
+            print("error getting position")
 
     #TODO create a button and text field for this!
     def set_position(self,intposition):
@@ -39,6 +38,7 @@ class phaseController():
         #self.position+=20
         self.pcSer.write("1PR10\r".encode())
         answer = self.pcSer.read_until(b'\r')
+        #print(answer)
         self.get_position()
 
     def minus_position(self):
@@ -84,5 +84,6 @@ exit_button = Button(controls_frame, text='Close', width=10, height=2, borderwid
 exit_button.pack(side=LEFT, padx=5)
 
 phaseDisplay.insert(1.0, "123456")
+pc.get_position()
 
 main_window.mainloop()
