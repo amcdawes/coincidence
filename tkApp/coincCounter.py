@@ -43,11 +43,12 @@ class CoincidenceCounter(object):
                 print(portstring)
                 self._ser = serial.Serial(portstring,250000,timeout=2)
                 self.useSerial = True
-                print("Using real data")
+                print("Device found, using real data")
+            else:
+                self.useSerial = False
+                print("Using fake data")
         except Exception as e:
             print(e)
-            self.useSerial = False
-            print("Using fake data")
 
     def __del__(self):
         if (self.useSerial):
